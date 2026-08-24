@@ -146,7 +146,7 @@ function LandingPage() {
                 onClick={() => navigate('/overview')}
                 className="group relative px-6 py-4 bg-[#0a0b0e] border-2 border-neon text-white text-xs font-bold tracking-[0.15em] uppercase rounded-full hover:bg-neon hover:text-black transition-all shadow-[0_0_20px_rgba(44,255,5,0.1)] hover:shadow-[0_0_40px_rgba(44,255,5,0.3)] inline-flex items-center justify-center gap-3"
               >
-                Enter Command Center <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                Enter Dashboard <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
               <button
                 onClick={() => { document.getElementById('pipeline').scrollIntoView({ behavior: 'smooth' }) }}
@@ -608,7 +608,7 @@ function LandingPage() {
             onClick={() => navigate('/overview')}
             className="px-10 py-5 bg-[#050608] text-white text-sm font-bold tracking-[0.2em] uppercase rounded-xl hover:bg-neon hover:text-black transition-all shadow-[0_15px_40px_rgba(0,0,0,0.2)] hover:shadow-[0_0_60px_rgba(44,255,5,0.4)] group inline-flex items-center gap-3"
           >
-            Enter Command Center <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            Enter Dashboard <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </section>
