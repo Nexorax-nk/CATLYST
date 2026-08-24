@@ -229,7 +229,7 @@ def process_csv_background(job_id: str, records: list):
             # Check job state for pause/stop
             db.commit()
             job = db.query(ProcessingJob).filter(ProcessingJob.id == job_id).first()
-            if not job or job.status == "Stopped":
+            if not job or job.status in ["Stopped", "Failed"]:
                 break
             
             while job.status == "Paused":
@@ -239,7 +239,7 @@ def process_csv_background(job_id: str, records: list):
                 if not job or job.status == "Stopped":
                     break
                     
-            if not job or job.status == "Stopped":
+            if not job or job.status in ["Stopped", "Failed"]:
                 break
 
             start_time = time.time()
@@ -412,7 +412,8 @@ def process_csv_background(job_id: str, records: list):
         job = db.query(ProcessingJob).filter(ProcessingJob.id == job_id).first()
         if job:
             job.processed_rows = count
-            job.status = "Completed"
+            if job.status not in ["Stopped", "Failed"]:
+                job.status = "Completed"
             job.completed_at = datetime.utcnow()
         db.commit()
     except Exception as e:
@@ -1018,7 +1019,7 @@ def job_action(job_id: str, payload: JobActionRequest, db: Session = Depends(get
             job.status = "Processing"
     elif payload.action == "stop":
         if job.status in ["Processing", "Paused"]:
-            job.status = "Stopped"
+            job.status = "Failed"
             job.completed_at = datetime.utcnow()
     else:
         raise HTTPException(status_code=400, detail="Invalid action")
