@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
@@ -11,7 +12,7 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchStats = () => {
-      axios.get('http://127.0.0.1:8080/api/dashboard')
+      axios.get(`${API_BASE}/api/dashboard`)
         .then(res => {
           setStats(res.data);
           setError(false);
@@ -65,10 +66,16 @@ function Dashboard() {
         </div>
           <div className="flex gap-2">
             <button
-              onClick={() => window.open('http://127.0.0.1:8080/api/export', '_blank')}
+              onClick={() => window.open(`${API_BASE}/api/export?format=csv`, '_blank')}
               className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2.5 shadow-sm hover:shadow transition-all mb-1"
             >
               <Download className="w-4 h-4" /> Export CSV
+            </button>
+            <button
+              onClick={() => window.open(`${API_BASE}/api/export?format=excel`, '_blank')}
+              className="bg-green-100 hover:bg-green-200 text-green-800 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2.5 shadow-sm hover:shadow transition-all mb-1"
+            >
+              <Download className="w-4 h-4" /> Export Excel
             </button>
             <button
               onClick={() => navigate('/enrichment')}
@@ -256,11 +263,14 @@ function Dashboard() {
                     <td className="px-4 lg:px-5 py-3.5 text-gray-600 font-medium">{job.progress}</td>
                     <td className="px-4 lg:px-5 py-3.5">
                       <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-md bg-gray-900 text-white shadow-sm">
-                        {job.status === 'Complete' ?
-                          <CheckCircle2 className="w-3.5 h-3.5 text-neon" /> :
+                        {job.status === 'Complete' ? (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-neon" />
+                        ) : job.status === 'Failed' ? (
+                          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.8)]" />
+                        ) : (
                           <span className="w-1.5 h-1.5 rounded-full bg-neon animate-pulse shadow-[0_0_6px_rgba(44,255,5,0.8)]" />
-                        }
-                        {job.status}
+                        )}
+                        {job.status === 'Failed' ? 'INTERRUPTED' : job.status}
                       </span>
                     </td>
                   </tr>

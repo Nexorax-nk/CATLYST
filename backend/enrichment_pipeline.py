@@ -101,7 +101,7 @@ Return strictly JSON matching this structure:
                     "content": prompt,
                 }
             ],
-            model="llama-3.1-8b-instant",
+            model="groq/compound",
             response_format={"type": "json_object"},
             temperature=0.1
         )

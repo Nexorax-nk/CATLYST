@@ -23,6 +23,20 @@ from database import engine, Base, get_db, Product, SessionLocal, ProcessingJob,
 async def lifespan(app: FastAPI):
     # Ensure tables exist
     Base.metadata.create_all(bind=engine)
+    
+    # Clean up any zombie jobs left over from previous unexpected shutdowns
+    db = SessionLocal()
+    try:
+        stuck_jobs = db.query(ProcessingJob).filter(ProcessingJob.status == 'Processing').all()
+        for job in stuck_jobs:
+            job.status = 'Failed'
+            job.errors = 'Job interrupted by server restart.'
+        if stuck_jobs:
+            db.commit()
+            print(f"Cleaned up {len(stuck_jobs)} zombie job(s) from previous run.")
+    finally:
+        db.close()
+        
     yield
 
 app = FastAPI(title="UniHack Product Intelligence Platform", lifespan=lifespan)
@@ -239,12 +253,26 @@ def process_csv_background(job_id: str, records: list):
                 continue
             seen_ids.add(item_id)
             
+            existing_prod = db.query(Product).filter(Product.id == item_id).first()
+            if existing_prod and existing_prod.status == "ai-enriched":
+                print(f"[{item_id}] Product already fully enriched. Skipping to resume...")
+                count += 1
+                if job:
+                    job.processed_rows += 1
+                    db.commit()
+                continue
+            
             print(f"[{item_id}] Started processing item...")
             
             try:
                 raw_mfg = str(row.get('Part_Manuf', row.get('Manufacturer', values[0] if values else '')))
                 raw_brand = str(row.get('E1_Brand', ''))
-                raw_desc = str(row.get('Part_Desc', row.get('Description', values[2] if len(values) > 2 else '')))
+                raw_desc = str(row.get('Part_Desc', row.get('Description', '')))
+                
+                # If there's no clear description column, dump the entire row for the AI!
+                if not raw_desc.strip():
+                    raw_desc = " | ".join([f"{k}: {v}" for k, v in row.items() if str(v).strip()])
+                    
                 raw_mpn = item_id
                 
                 # --- REAL PIPELINE EXECUTION ---
@@ -554,9 +582,9 @@ def get_analytics(db: Session = Depends(get_db)):
     ]
     
     # Source Performance
-    all_products = db.query(Product).all()
-    total_sources = sum(len(p.sources) for p in all_products if isinstance(p.sources, list))
-    website_success = sum(1 for p in all_products if isinstance(p.sources, list) and any("http" in str(s).lower() for s in p.sources))
+    sources_data = db.query(Product.sources).all()
+    total_sources = sum(len(s[0]) for s in sources_data if isinstance(s[0], list))
+    website_success = sum(1 for s in sources_data if isinstance(s[0], list) and any("http" in str(src).lower() for src in s[0]))
     
     source_performance = {
         "websites": {"success": f"{(website_success / total_products) * 100:.0f}%" if total_products > 0 else "0%"},
@@ -999,11 +1027,12 @@ def job_action(job_id: str, payload: JobActionRequest, db: Session = Depends(get
     return {"status": "success", "job_status": job.status}
 
 @app.get("/api/export")
-def export_products_csv(db: Session = Depends(get_db)):
+def export_products(format: str = 'csv', db: Session = Depends(get_db)):
     """Export all processed products matching the exact Unihack output format."""
     from fastapi.responses import StreamingResponse
     import csv
     import io
+    import pandas as pd
     
     products = db.query(Product).all()
     
@@ -1028,9 +1057,8 @@ def export_products_csv(db: Session = Depends(get_db)):
         "Discontinued", "Actual Image (Yes/No)"
     ]
 
-    output = io.StringIO()
-    writer = csv.DictWriter(output, fieldnames=headers)
-    writer.writeheader()
+    
+    rows_list = []
     
     for p in products:
         row = {h: "" for h in headers}
@@ -1081,14 +1109,31 @@ def export_products_csv(db: Session = Depends(get_db)):
                     row[f"ATTRIBUTE_UOM {attr_idx}"] = attr.get("uom", "")
                     attr_idx += 1
                     
-        writer.writerow(row)
+                    
+        rows_list.append(row)
         
-    output.seek(0)
-    return StreamingResponse(
-        iter([output.getvalue()]), 
-        media_type="text/csv", 
-        headers={"Content-Disposition": "attachment; filename=unihack_export.csv"}
-    )
+    if format.lower() == 'excel':
+        df = pd.DataFrame(rows_list, columns=headers)
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False)
+        output.seek(0)
+        return StreamingResponse(
+            iter([output.getvalue()]), 
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+            headers={"Content-Disposition": "attachment; filename=unihack_export.xlsx"}
+        )
+    else:
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(rows_list)
+        output.seek(0)
+        return StreamingResponse(
+            iter([output.getvalue()]), 
+            media_type="text/csv", 
+            headers={"Content-Disposition": "attachment; filename=unihack_export.csv"}
+        )
 
 import traceback
 from fastapi.responses import JSONResponse

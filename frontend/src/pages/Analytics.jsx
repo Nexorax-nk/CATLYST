@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart as RechartsLineChart, Line, Legend } from 'recharts';
@@ -9,7 +10,7 @@ function Analytics() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8080/api/analytics')
+    axios.get(`${API_BASE}/api/analytics`)
       .then(res => setData(res.data))
       .catch(err => console.error(err));
   }, []);
@@ -131,7 +132,9 @@ function Analytics() {
                       </ResponsiveContainer>
                       {/* Center Text */}
                       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
-                        <span className="text-[26px] font-extrabold text-white tracking-tight">{data.confidence_distribution[0].count}%</span>
+                        <span className="text-[26px] font-extrabold text-white tracking-tight">
+                          {data.confidence_distribution?.length > 0 ? Number(data.confidence_distribution[0].count).toFixed(1) : 0}%
+                        </span>
                         <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">HIGH</span>
                       </div>
                     </div>
@@ -145,7 +148,7 @@ function Analytics() {
                               <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: pieColor }} />
                               <span className="text-gray-400">{band.name}</span>
                             </div>
-                            <span className="text-white">{band.count}%</span>
+                            <span className="text-white">{Number(band.count).toFixed(1)}%</span>
                           </div>
                         );
                       })}

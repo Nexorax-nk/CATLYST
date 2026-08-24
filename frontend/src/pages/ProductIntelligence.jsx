@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -11,7 +12,7 @@ function ProductIntelligence() {
   const [evidenceDrawer, setEvidenceDrawer] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://127.0.0.1:8080/api/product/${id}`)
+    axios.get(`${API_BASE}/api/product/${id}`)
       .then(res => setProduct(res.data))
       .catch(console.error);
   }, [id]);

@@ -172,7 +172,7 @@ def extract_real_manufacturer(part_desc: str, part_manuf: str) -> dict:
             if part_desc:
                 try:
                     completion = get_groq_completion(
-                        model="llama-3.1-8b-instant", 
+                        model="groq/compound", 
                         messages=[
                             {"role": "system", "content": "Extract the real manufacturer and brand from the product description. Output valid JSON only: {\"manufacturer\": \"\", \"brand\": \"\"}"},
                             {"role": "user", "content": f"Description: {part_desc}"}
@@ -322,7 +322,7 @@ def _call_groq_with_retry(messages, max_tokens=600):
     for attempt in range(max_retries):
         try:
             completion = get_groq_completion(
-                model="llama-3.1-8b-instant",
+                model="groq/compound",
                 messages=messages,
                 temperature=0,
                 max_tokens=max_tokens

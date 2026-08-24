@@ -56,7 +56,7 @@ def resolve_entity(manufacturer_str: str, brand_str: str):
 
     try:
         completion = get_groq_completion(
-            model="llama-3.1-8b-instant",
+            model="groq/compound",
             messages=[
                 {"role": "system", "content": "You output only valid JSON."},
                 {"role": "user", "content": prompt}

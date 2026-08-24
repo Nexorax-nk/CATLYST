@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Search, SlidersHorizontal, Zap, Loader2, Package, Tag, Building2 } from 'lucide-react';
@@ -17,7 +18,7 @@ function IntelligentSearch() {
     setIsSearching(true);
     setHasSearched(true);
     try {
-      const response = await axios.get(`http://127.0.0.1:8080/api/search?q=${encodeURIComponent(query)}`);
+      const response = await axios.get(`${API_BASE}/api/search?q=${encodeURIComponent(query)}`);
       setResults(response.data);
     } catch (error) {
       console.error(error);

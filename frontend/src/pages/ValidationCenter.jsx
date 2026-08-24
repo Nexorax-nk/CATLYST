@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, AlertTriangle, Check, X, Search, Filter, List, Activity, Radar, ChevronLeft, ChevronRight, ChevronDown, CheckCircle2 } from 'lucide-react';
 
@@ -13,7 +14,7 @@ function ValidationCenter() {
   const fetchValidationQueue = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8080/api/validation/queue");
+      const res = await fetch(`${API_BASE}/api/validation/queue`);
       const data = await res.json();
       setConflicts(data);
       if (data.length > 0) setActiveId(data[0].id);
@@ -26,7 +27,7 @@ function ValidationCenter() {
 
   const handleAccept = async (id, attribute_key, corrected_value) => {
     try {
-      await fetch(`http://127.0.0.1:8080/api/validation/${id}/accept`, {
+      await fetch(`${API_BASE}/api/validation/${id}/accept`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ attribute_key, corrected_value })
@@ -39,7 +40,7 @@ function ValidationCenter() {
 
   const handleReject = async (id) => {
     try {
-      await fetch(`http://127.0.0.1:8080/api/validation/${id}/reject`, { method: "POST" });
+      await fetch(`${API_BASE}/api/validation/${id}/reject`, { method: "POST" });
       removeConflict(id);
     } catch (e) {
       console.error(e);

@@ -11,10 +11,21 @@ import {
 function LandingPage() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('overview');
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+      
+      const sections = ['overview', 'problem', 'pipeline', 'architecture', 'scale'];
+      let current = 'overview';
+      for (const section of sections) {
+        const el = document.getElementById(section);
+        if (el && window.scrollY >= (el.offsetTop - 300)) {
+          current = section;
+        }
+      }
+      setActiveSection(current);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -48,18 +59,27 @@ function LandingPage() {
           </div>
 
           <div className="hidden lg:flex items-center gap-8">
-            <div className="flex flex-col items-center gap-1 cursor-pointer">
-              <span className="text-neon text-xs font-bold tracking-widest uppercase">Overview</span>
-              <div className="flex items-center w-full justify-center gap-1">
-                <div className="h-px bg-neon/50 w-full"></div>
-                <div className="w-1.5 h-1.5 rounded-full bg-neon"></div>
-                <div className="h-px bg-neon/50 w-full"></div>
+            {[
+              { id: 'overview', label: 'Overview' },
+              { id: 'problem', label: 'The Problem' },
+              { id: 'pipeline', label: 'Pipeline' },
+              { id: 'architecture', label: 'Architecture' },
+              { id: 'scale', label: 'Scale' }
+            ].map((item) => (
+              <div 
+                key={item.id} 
+                onClick={() => document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' })}
+                className="flex flex-col items-center gap-1 cursor-pointer group"
+              >
+                <span className={`text-xs font-bold tracking-widest uppercase transition-colors ${activeSection === item.id ? 'text-neon' : 'text-gray-300 group-hover:text-white'}`}>
+                  {item.label}
+                </span>
+                <div className={`flex items-center w-full justify-center gap-1 transition-opacity ${activeSection === item.id ? 'opacity-100' : 'opacity-0'}`}>
+                  <div className="h-px bg-neon/50 w-full"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-neon"></div>
+                  <div className="h-px bg-neon/50 w-full"></div>
+                </div>
               </div>
-            </div>
-            {['Product', 'Platform', 'Solutions', 'Resources', 'About'].map((item) => (
-              <span key={item} className="text-gray-300 hover:text-white text-xs font-bold tracking-widest uppercase cursor-pointer transition-colors">
-                {item}
-              </span>
             ))}
           </div>
 
@@ -81,7 +101,7 @@ function LandingPage() {
       </nav>
 
       {/* HERO SECTION */}
-      <main className="relative z-10 pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 min-h-screen flex items-center border-b border-white/5">
+      <main id="overview" className="relative z-10 pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 min-h-screen flex items-center border-b border-white/5">
 
         {/* Full-width Absolute Background Container */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -166,7 +186,7 @@ function LandingPage() {
       </main>
 
       {/* SECTION 02 */}
-      <section className="relative z-10 min-h-screen w-full bg-white flex items-center overflow-hidden border-t border-white/5">
+      <section id="problem" className="relative z-10 min-h-screen w-full bg-white flex items-center overflow-hidden border-t border-white/5">
         {/* Background Image - Align to right to reduce empty space */}
         <div className="absolute inset-0 pointer-events-none p-4 lg:py-12 lg:pl-12 lg:pr-4">
           <img
@@ -252,7 +272,7 @@ function LandingPage() {
       </section>
 
       {/* SECTION 03 — THE TRANSFORMATION PIPELINE */}
-      <section className="relative z-10 min-h-screen w-full bg-[#030504] flex items-center overflow-hidden border-t border-white/5 py-12 lg:py-16">
+      <section id="pipeline" className="relative z-10 min-h-screen w-full bg-[#030504] flex items-center overflow-hidden border-t border-white/5 py-12 lg:py-16">
         {/* Background Image */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img
@@ -350,7 +370,7 @@ function LandingPage() {
 
 
       {/* SECTION 05 — INTELLIGENCE ARCHITECTURE */}
-      <section className="relative z-10 w-full min-h-[calc(100vh-80px)] flex flex-col justify-center items-center overflow-hidden pt-10 pb-16 lg:pb-24">
+      <section id="architecture" className="relative z-10 w-full min-h-[calc(100vh-80px)] flex flex-col justify-center items-center overflow-hidden pt-10 pb-16 lg:pb-24">
         {/* Background Image */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <img
@@ -503,7 +523,7 @@ function LandingPage() {
 
 
       {/* SECTION 09 & 10 — SCALE & BATCH PROCESSING */}
-      <section className="relative z-10 pb-24 lg:pb-32 pt-16 lg:pt-20 px-6 bg-[#050608] border-y border-white/5">
+      <section id="scale" className="relative z-10 pb-24 lg:pb-32 pt-16 lg:pt-20 px-6 bg-[#050608] border-y border-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-[10px] font-bold tracking-widest text-neon uppercase mb-4">BUILT FOR THE CATALOG. NOT JUST THE DEMO.</h2>

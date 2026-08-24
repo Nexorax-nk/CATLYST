@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Database, Plus, Globe, Layers, Link as LinkIcon, FileText, CheckCircle2, AlertCircle, RefreshCw, MoreVertical } from 'lucide-react';
@@ -13,7 +14,7 @@ function Sources() {
   const [sources, setSources] = useState([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8080/api/sources')
+    axios.get(`${API_BASE}/api/sources`)
       .then(res => setSources(res.data))
       .catch(err => console.error(err));
   }, []);

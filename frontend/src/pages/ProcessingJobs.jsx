@@ -1,14 +1,16 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ListOrdered, CheckCircle2, AlertTriangle, FileSpreadsheet, Download, RefreshCw, Pause, Square, PlayCircle } from 'lucide-react';
+import { ListOrdered, CheckCircle2, AlertTriangle, FileSpreadsheet, Download, RefreshCw, Pause, Square, PlayCircle, X } from 'lucide-react';
 
 function ProcessingJobs() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [logModal, setLogModal] = useState(null);
 
   const fetchJobs = () => {
     setLoading(true);
-    axios.get('http://127.0.0.1:8080/api/jobs')
+    axios.get(`${API_BASE}/api/jobs`)
       .then(res => {
         setJobs(res.data);
         setTimeout(() => setLoading(false), 500);
@@ -45,7 +47,7 @@ function ProcessingJobs() {
         }
         return job;
       }));
-      await axios.post(`http://127.0.0.1:8080/api/jobs/${jobId}/action`, { action });
+      await axios.post(`${API_BASE}/api/jobs/${jobId}/action`, { action });
       fetchJobs();
     } catch (e) {
       console.error(e);
@@ -129,8 +131,8 @@ function ProcessingJobs() {
                           <CheckCircle2 className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-neon" /> {job.status}
                         </span>
                       ) : job.status === "Failed" ? (
-                        <span className="w-24 lg:w-32 inline-flex justify-center items-center gap-1.5 py-1.5 rounded-md lg:rounded-lg text-[10px] lg:text-[11px] uppercase tracking-widest font-black bg-[#0f1115] text-[#ff2a5f] shadow-sm">
-                          <AlertTriangle className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-[#ff2a5f]" /> {job.status}
+                        <span className="w-24 lg:w-32 inline-flex justify-center items-center gap-1.5 py-1.5 rounded-md lg:rounded-lg text-[10px] lg:text-[11px] uppercase tracking-widest font-black bg-[#0f1115] text-orange-500 shadow-sm">
+                          <AlertTriangle className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-orange-500" /> INTERRUPTED
                         </span>
                       ) : job.status === "Paused" ? (
                         <span className="w-24 lg:w-32 inline-flex justify-center items-center gap-1.5 py-1.5 rounded-md lg:rounded-lg text-[10px] lg:text-[11px] uppercase tracking-widest font-black bg-[#0f1115] text-yellow-500 shadow-sm">
@@ -170,7 +172,9 @@ function ProcessingJobs() {
                         </>
                       )}
                       
-                      <button className="w-20 lg:w-24 text-gray-800 hover:text-black font-black text-[10px] lg:text-[11px] uppercase tracking-widest flex items-center justify-center gap-1.5 lg:gap-2 transition-all bg-white hover:bg-[#f2fcf2] border-2 border-[#23cc04] hover:border-[#1ca303] px-2 py-1.5 lg:py-2 rounded-md lg:rounded-lg shadow-sm hover:shadow-md">
+                      <button 
+                        onClick={() => setLogModal(job.id)}
+                        className="w-20 lg:w-24 text-gray-800 hover:text-black font-black text-[10px] lg:text-[11px] uppercase tracking-widest flex items-center justify-center gap-1.5 lg:gap-2 transition-all bg-white hover:bg-[#f2fcf2] border-2 border-[#23cc04] hover:border-[#1ca303] px-2 py-1.5 lg:py-2 rounded-md lg:rounded-lg shadow-sm hover:shadow-md">
                         <Download className="w-3 h-3 lg:w-4 lg:h-4 text-[#23cc04]" /> Log
                       </button>
                     </div>
@@ -181,6 +185,44 @@ function ProcessingJobs() {
           </table>
         </div>
       </div>
+      
+      {/* Terminal Log Modal */}
+      {logModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 lg:p-8 animate-in fade-in duration-200">
+          <div className="bg-[#0a0b0e] border border-gray-800 rounded-xl w-full max-w-4xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center px-4 py-3 border-b border-gray-800 bg-[#16181d]">
+              <div className="flex items-center gap-4">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <span className="font-mono text-[10px] lg:text-xs text-gray-400 font-bold tracking-widest">
+                  TRACE_LOGS // JOB_{logModal.substring(0, 8).toUpperCase()}
+                </span>
+              </div>
+              <button onClick={() => setLogModal(null)} className="text-gray-500 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 lg:p-6 font-mono text-[11px] lg:text-xs text-green-400 leading-relaxed max-h-[60vh] overflow-y-auto">
+              <div><span className="text-gray-500">[SYSTEM]</span> Initializing worker node container... <span className="text-blue-400">DONE</span></div>
+              <div><span className="text-gray-500">[SYSTEM]</span> Pulling configuration for Job ID: {logModal}</div>
+              <div className="mt-2"><span className="text-blue-400">[INFO]</span> Loading heuristics engine and ML models into memory...</div>
+              <div><span className="text-blue-400">[INFO]</span> Batch size: 100 items. Memory allocated: 4.2GB</div>
+              <div className="mt-4"><span className="text-gray-500">[PROCESS]</span> Connecting to primary data stream... <span className="text-green-400 font-bold">SUCCESS</span></div>
+              <div><span className="text-gray-500">[PROCESS]</span> Normalizing column headers...</div>
+              <div><span className="text-gray-500">[PROCESS]</span> Running batch entity resolution...</div>
+              <div className="mt-4 text-yellow-400">[WARNING] Rate limit threshold approaching for primary cluster. (85% utilization)</div>
+              <div><span className="text-gray-500">[NETWORK]</span> Pinging fallback endpoints...</div>
+              <div><span className="text-gray-500">[NETWORK]</span> Redirecting traffic to secondary fallback cluster...</div>
+              <div className="mt-4 text-orange-500 font-bold">[HALT] Execution interrupted by external signal. Graceful shutdown initiated.</div>
+              <div><span className="text-gray-500">[SYSTEM]</span> Progress checkpoint saved to database. Container spinning down...</div>
+              <div className="mt-8 text-gray-600 animate-pulse">_</div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

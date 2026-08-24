@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Upload, Settings2, Play, CheckCircle2, FileUp, Sparkles, Database, Layers, CheckCircle, Loader2, Zap, AlertTriangle, Pause, Square, PlayCircle } from 'lucide-react';
@@ -18,13 +19,22 @@ function EnrichmentStudio() {
   const handleUploadAnalyze = async (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
+    
+    const validTypes = ['.csv', '.xlsx'];
+    const fileName = selectedFile.name.toLowerCase();
+    if (!validTypes.some(ext => fileName.endsWith(ext))) {
+      alert("Only CSV or Excel files are supported.");
+      e.target.value = '';
+      return;
+    }
+    
     setFile(selectedFile);
     
     const formData = new FormData();
     formData.append("file", selectedFile);
     
     try {
-      const response = await axios.post("http://127.0.0.1:8080/api/upload-analyze", formData);
+      const response = await axios.post(`${API_BASE}/api/upload-analyze`, formData);
       setFileMeta(response.data);
       generateBatches(response.data.total_rows, 100);
       setStep(2);
@@ -71,7 +81,7 @@ function EnrichmentStudio() {
     setStep(3);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8080/api/batch-process", {
+      const response = await axios.post(`${API_BASE}/api/batch-process`, {
         file_path: fileMeta.file_path,
         filename: fileMeta.filename,
         start_row: batch.start,
@@ -121,7 +131,7 @@ function EnrichmentStudio() {
         if (action === 'stop') newBatches[batchIdx].status = 'Stopped';
         return newBatches;
       });
-      await axios.post(`http://127.0.0.1:8080/api/jobs/${batch.jobId}/action`, { action });
+      await axios.post(`${API_BASE}/api/jobs/${batch.jobId}/action`, { action });
     } catch(e) {
       console.error(e);
     }
@@ -132,7 +142,7 @@ function EnrichmentStudio() {
     if (activeJobId && activeBatchIndex !== null) {
       interval = setInterval(async () => {
         try {
-          const res = await axios.get(`http://127.0.0.1:8080/api/jobs/${activeJobId}`);
+          const res = await axios.get(`${API_BASE}/api/jobs/${activeJobId}`);
           
           setBatches(prev => {
             const newBatches = [...prev];

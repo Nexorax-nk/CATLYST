@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useEffect, useState, useRef } from 'react';
 import { Search, Filter, Shield, Box, Plus, CheckCircle2, ChevronDown, Download, AlertTriangle, MoreHorizontal, ChevronLeft, ChevronRight, X, ChevronsUpDown, Building2, Tag, Layers } from 'lucide-react';
 import axios from 'axios';
@@ -34,7 +35,7 @@ function Catalog() {
   }, []);
 
   const fetchCatalog = () => {
-    axios.get('http://127.0.0.1:8080/api/catalog')
+    axios.get(`${API_BASE}/api/catalog`)
       .then(res => {
         setProducts(res.data.items);
         setLoading(false);
@@ -125,10 +126,16 @@ function Catalog() {
         </div>
         <div className="flex gap-3">
           <button 
-            onClick={() => window.open('http://127.0.0.1:8080/api/export', '_blank')}
+            onClick={() => window.open(`${API_BASE}/api/export?format=csv`, '_blank')}
             className="bg-white border border-gray-200 hover:border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-[13px] font-semibold flex items-center gap-2 shadow-sm transition-colors"
           >
-            <Download className="w-4 h-4" /> Export
+            <Download className="w-4 h-4" /> Export CSV
+          </button>
+          <button 
+            onClick={() => window.open(`${API_BASE}/api/export?format=excel`, '_blank')}
+            className="bg-green-50 border border-green-200 hover:border-green-300 text-green-700 px-4 py-2 rounded-lg text-[13px] font-semibold flex items-center gap-2 shadow-sm transition-colors"
+          >
+            <Download className="w-4 h-4" /> Export Excel
           </button>
           <button 
             onClick={() => navigate('/enrichment')}
