@@ -22,8 +22,9 @@
 
 ---
 
-## 🚀 Live Deployment
-- **Frontend:** Deployed on Vercel
+## 🚀 Live Deployment & Final Output
+- **Final Hackathon Output:** [📥 unihack_export.xlsx](./unihack_export.xlsx) *(Judges: Please click here to view our AI-structured dataset!)*
+- **Frontend:** [catlyst-lovat.vercel.app](https://catlyst-lovat.vercel.app/)
 - **Backend API:** [catlyst-backend.onrender.com](https://catlyst-backend.onrender.com)
 - **Database:** Supabase PostgreSQL
 
