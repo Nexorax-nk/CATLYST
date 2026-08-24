@@ -3,7 +3,7 @@ import os
 import sys
 
 # The exact path the user provided for the Expected Output
-EXPECTED_OUTPUT_PATH = r"C:\Users\navee\CATLYST\Unihack_ Expected Output - Delivery Format (1).csv"
+EXPECTED_OUTPUT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "expected_output.csv")
 
 def build_masters_from_expected_output():
     manufacturers_list = []
