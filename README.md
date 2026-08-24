@@ -23,7 +23,7 @@
 ---
 
 ## 🚀 Live Deployment & Final Output
-- **Final Hackathon Output:** [📥 unihack_export.xlsx](./unihack_export.xlsx) *(Judges: Please click here to view our AI-structured dataset!)*
+- **Final Hackathon Output:** [📥 Download unihack_export.xlsx](https://github.com/Nexorax-nk/CATLYST/raw/main/unihack_export.xlsx) *(Judges: Please click here to download our AI-structured dataset!)*
 - **Frontend:** [catlyst-lovat.vercel.app](https://catlyst-lovat.vercel.app/)
 - **Backend API:** [catlyst-backend.onrender.com](https://catlyst-backend.onrender.com)
 - **Database:** Supabase PostgreSQL
