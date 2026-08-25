@@ -49,6 +49,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/api/health")
+def health_check():
+    return {"status": "awake"}
+
 @app.get("/api/sources")
 def get_sources(db: Session = Depends(get_db)):
     products = db.query(Product).filter(Product.sources != None).all()
